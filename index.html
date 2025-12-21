@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOKUS HUB - Premium Key System</title>
+    <title>LOKUS HUB - Premium Key System with API</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -171,6 +171,56 @@
         .btn-menu:hover {
             background: rgba(188, 19, 254, 0.2);
             border-color: var(--neon-purple);
+        }
+
+        /* API Tester */
+        .api-tester {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid rgba(188, 19, 254, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            width: 300px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        .api-tester.show {
+            display: block;
+        }
+
+        .api-tester h3 {
+            color: var(--neon-purple);
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .api-input {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(188, 19, 254, 0.2);
+            border-radius: 6px;
+            color: var(--text);
+            margin-bottom: 10px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .api-response {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(188, 19, 254, 0.2);
+            border-radius: 6px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
         /* Dashboard */
@@ -566,57 +616,51 @@
             margin-right: auto;
         }
 
-        /* Toast */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        /* Verification States */
+        .task-list {
+            margin: 20px 0;
         }
 
-        .toast {
-            padding: 20px;
-            background: var(--card-bg);
-            border-left: 4px solid var(--neon-purple);
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        .task-item {
             display: flex;
             align-items: center;
             gap: 15px;
-            transform: translateX(100%);
-            opacity: 0;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(188, 19, 254, 0.2);
-            min-width: 300px;
-            backdrop-filter: blur(10px);
+            padding: 15px;
+            background: rgba(188, 19, 254, 0.05);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(188, 19, 254, 0.1);
         }
 
-        .toast.show {
-            transform: translateX(0);
-            opacity: 1;
+        .task-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: rgba(188, 19, 254, 0.1);
+            color: var(--neon-purple);
         }
 
-        .toast-icon {
-            font-size: 24px;
+        .task-icon.completed {
+            background: var(--success);
+            color: white;
         }
 
-        .toast.success {
-            border-left-color: var(--success);
+        .task-info {
+            flex: 1;
         }
 
-        .toast.error {
-            border-left-color: var(--danger);
+        .task-name {
+            font-weight: 600;
+            color: var(--text);
         }
 
-        .toast.warning {
-            border-left-color: var(--warning);
-        }
-
-        .toast.info {
-            border-left-color: var(--neon-blue);
+        .task-status {
+            font-size: 12px;
+            color: var(--text-secondary);
         }
 
         /* Footer */
@@ -690,12 +734,32 @@
                 width: 100%;
                 justify-content: center;
             }
+            
+            .api-tester {
+                position: relative;
+                top: auto;
+                right: auto;
+                width: 100%;
+                margin-bottom: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Particles Background -->
     <div class="particles" id="particles"></div>
+
+    <!-- API Tester (Hidden by default) -->
+    <div class="api-tester" id="apiTester">
+        <h3><i class="fas fa-code"></i> API Tester</h3>
+        <input type="text" class="api-input" id="apiKeyInput" placeholder="Enter key to test">
+        <div class="api-response" id="apiResponse">
+            {/* API response will appear here */}
+        </div>
+        <button class="btn-secondary" style="margin-top: 10px; width: 100%;" onclick="testAPI()">
+            <i class="fas fa-play"></i> Test API
+        </button>
+    </div>
 
     <div class="container">
         <!-- Header -->
@@ -710,6 +774,9 @@
                 </div>
             </div>
             <div class="header-actions">
+                <button class="btn-secondary" onclick="toggleAPITester()">
+                    <i class="fas fa-code"></i> API Test
+                </button>
                 <a href="https://discord.gg/7NGeYQz6ZR" class="btn-discord" target="_blank">
                     <i class="fab fa-discord"></i>
                     Join Discord
@@ -733,7 +800,7 @@
                         <p class="card-subtitle">Complete 2 tasks to generate keys</p>
                     </div>
                 </div>
-                
+
                 <div class="progress-section">
                     <div class="progress-header">
                         <span class="progress-label">Current Progress</span>
@@ -744,6 +811,11 @@
                     </div>
                 </div>
 
+                <!-- Task List -->
+                <div class="task-list" id="taskList">
+                    <!-- Tasks will be added here -->
+                </div>
+
                 <button class="btn btn-primary" id="startBtn">
                     <i class="fas fa-play"></i>
                     Start Verification
@@ -752,7 +824,7 @@
                 <div style="margin-top: 20px; padding: 15px; background: rgba(188, 19, 254, 0.05); border-radius: 10px;">
                     <p style="color: var(--text-secondary); font-size: 14px; display: flex; align-items: center; gap: 10px;">
                         <i class="fas fa-info-circle" style="color: var(--neon-blue);"></i>
-                        Complete Linkvertise tasks to earn progress. Each task takes about 30 seconds.
+                        Complete Linkvertise task to earn progress
                     </p>
                 </div>
             </div>
@@ -789,9 +861,11 @@
                     Generate New Key
                 </button>
 
-                <p style="text-align: center; margin-top: 15px; color: var(--text-secondary); font-size: 13px;">
-                    <i class="fas fa-clock"></i> 24-hour duration • <i class="fas fa-sync-alt"></i> Extendable
-                </p>
+                <div style="margin-top: 20px; padding: 15px; background: rgba(188, 19, 254, 0.05); border-radius: 10px;">
+                    <p style="color: var(--text-secondary); font-size: 12px; text-align: center;">
+                        <i class="fas fa-code"></i> API Endpoint: <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">/api/check</code>
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -806,6 +880,10 @@
                     <button class="btn-secondary" style="padding: 12px 24px;" onclick="resetProgress()">
                         <i class="fas fa-redo"></i>
                         Reset Progress
+                    </button>
+                    <button class="btn-secondary" style="padding: 12px 24px;" onclick="manualAddProgress()">
+                        <i class="fas fa-plus"></i>
+                        Add Progress
                     </button>
                 </div>
             </div>
@@ -831,11 +909,67 @@
             </div>
         </div>
 
+        <!-- API Documentation -->
+        <div class="keys-section" style="margin-top: 40px;">
+            <div class="section-header">
+                <h3 class="section-title"><i class="fas fa-code"></i> API Documentation</h3>
+            </div>
+            <div class="keys-container">
+                <div style="padding: 20px;">
+                    <h4 style="color: var(--neon-purple); margin-bottom: 15px;">API Endpoints</h4>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <h5 style="color: var(--text); margin-bottom: 10px;">
+                            <code style="background: rgba(188, 19, 254, 0.1); padding: 5px 10px; border-radius: 6px; color: var(--neon-purple);">
+                                POST /api/check
+                            </code>
+                        </h5>
+                        <p style="color: var(--text-secondary); margin-bottom: 10px;">Validate a key from Roblox GUI</p>
+                        
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; margin-bottom: 15px; font-family: monospace; font-size: 12px;">
+                            <span style="color: var(--neon-blue);">Request Body (JSON):</span><br>
+                            {<br>
+                            &nbsp;&nbsp;"key": "LOKUS-XXXX-XXXX-XXXX",<br>
+                            &nbsp;&nbsp;"hwid": "user_hwid_here",<br>
+                            &nbsp;&nbsp;"game": 1234567890<br>
+                            }<br><br>
+                            
+                            <span style="color: var(--neon-blue);">Response (JSON):</span><br>
+                            {<br>
+                            &nbsp;&nbsp;"success": true,<br>
+                            &nbsp;&nbsp;"message": "Key valid",<br>
+                            &nbsp;&nbsp;"expires": "2024-12-31 23:59:59",<br>
+                            &nbsp;&nbsp;"status": "ACTIVE"<br>
+                            }
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h5 style="color: var(--text); margin-bottom: 10px;">
+                            <code style="background: rgba(188, 19, 254, 0.1); padding: 5px 10px; border-radius: 6px; color: var(--neon-purple);">
+                                GET /api/status?key=LOKUS-XXXX-XXXX-XXXX
+                            </code>
+                        </h5>
+                        <p style="color: var(--text-secondary); margin-bottom: 10px;">Check key status</p>
+                    </div>
+
+                    <div>
+                        <h5 style="color: var(--text); margin-bottom: 10px;">
+                            <code style="background: rgba(188, 19, 254, 0.1); padding: 5px 10px; border-radius: 6px; color: var(--neon-purple);">
+                                GET /api/stats
+                            </code>
+                        </h5>
+                        <p style="color: var(--text-secondary); margin-bottom: 10px;">Get system statistics</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Footer -->
         <footer class="footer">
             <p>© 2024 LOKUS HUB. All rights reserved.</p>
             <p style="margin-top: 10px; font-size: 12px; opacity: 0.7;">
-                This product is for educational purposes only. Use at your own risk.
+                API System Ready • This product is for educational purposes only
             </p>
             <div class="footer-links">
                 <a href="https://lokus-hub.vercel.app/getkey" class="footer-link" target="_blank">
@@ -864,17 +998,18 @@
         // Configuration
         const CONFIG = {
             MAX_KEYS: 6,
-            KEY_DURATION: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+            KEY_DURATION: 24 * 60 * 60 * 1000, // 24 hours
             LINKVERTISE_URL: "https://linkvertise.com/1446949/duPCtVbXsxIW?o=sharing",
-            SESSION_DURATION: 30 // Verification session duration in seconds
+            VALID_HASHES: ["verified", "completed", "success", "done", "true", "1"],
+            SESSION_TIMEOUT: 30 * 60 * 1000 // 30 minutes
         };
 
         // State
         let userIP = "unknown";
         let progress = 0;
         let keys = [];
-        let verificationSession = null;
-        let isProcessing = false;
+        let currentSession = null;
+        let apiRequests = [];
 
         // DOM Elements
         const startBtn = document.getElementById('startBtn');
@@ -886,6 +1021,10 @@
         const activeKeysEl = document.getElementById('activeKeys');
         const keysCount = document.getElementById('keysCount');
         const keysTable = document.getElementById('keysTable');
+        const taskList = document.getElementById('taskList');
+        const apiTester = document.getElementById('apiTester');
+        const apiResponse = document.getElementById('apiResponse');
+        const apiKeyInput = document.getElementById('apiKeyInput');
 
         // Initialize
         init();
@@ -903,77 +1042,336 @@
                 userIP = 'local-' + Math.random().toString(36).substr(2, 9);
             }
 
-            // Load progress from localStorage
-            loadProgress();
+            // Load user data
+            loadUserData();
             
-            // Load keys from localStorage
-            loadKeys();
+            // Check URL parameters
+            checkURLParameters();
             
             // Update UI
+            updateTaskList();
             updateProgressUI();
             updateKeysTable();
             updateStats();
             
-            // Check for active verification sessions
-            checkVerificationStatus();
+            // Setup API server simulation
+            setupAPIServer();
             
             // Start background checks
-            setInterval(checkVerificationStatus, 2000);
             setInterval(updateTimers, 1000);
-            setInterval(autoSave, 30000);
+            setInterval(cleanupOldSessions, 60000);
+        }
+
+        // API Server Simulation
+        function setupAPIServer() {
+            // This simulates API endpoints that would run on Vercel
+            // In production, you'd use Vercel Functions or a separate backend
+            
+            console.log("API Server initialized");
+            console.log("Available endpoints:");
+            console.log("- POST /api/check - Validate keys");
+            console.log("- GET /api/status?key=XXX - Check key status");
+            console.log("- GET /api/stats - Get system statistics");
+        }
+
+        // Handle API requests
+        async function handleAPIRequest(endpoint, method, data) {
+            const timestamp = new Date().toISOString();
+            const requestId = 'req_' + Date.now();
+            
+            apiRequests.unshift({
+                id: requestId,
+                endpoint,
+                method,
+                data,
+                timestamp,
+                ip: userIP
+            });
+            
+            // Keep only last 50 requests
+            if (apiRequests.length > 50) {
+                apiRequests = apiRequests.slice(0, 50);
+            }
+            
+            // Simulate API processing
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Handle different endpoints
+            switch(endpoint) {
+                case '/api/check':
+                    return handleKeyCheck(data);
+                case '/api/status':
+                    return handleKeyStatus(data);
+                case '/api/stats':
+                    return handleStats();
+                default:
+                    return {
+                        success: false,
+                        message: "Invalid endpoint",
+                        error: "Endpoint not found"
+                    };
+            }
+        }
+
+        // Key validation API
+        function handleKeyCheck(data) {
+            if (!data || !data.key) {
+                return {
+                    success: false,
+                    message: "Missing key parameter",
+                    error: "INVALID_REQUEST"
+                };
+            }
+            
+            const key = data.key;
+            const hwid = data.hwid || "unknown";
+            const gameId = data.game || 0;
+            
+            // Find the key in local storage
+            const allKeys = getAllKeys();
+            const keyData = allKeys.find(k => k.key === key);
+            
+            if (!keyData) {
+                return {
+                    success: false,
+                    message: "Key not found",
+                    error: "KEY_NOT_FOUND"
+                };
+            }
+            
+            // Check if expired
+            const expires = new Date(keyData.expires);
+            const now = new Date();
+            
+            if (expires < now) {
+                return {
+                    success: false,
+                    message: "Key has expired",
+                    error: "KEY_EXPIRED",
+                    status: "EXPIRED",
+                    expires: expires.toISOString()
+                };
+            }
+            
+            // Check if banned
+            if (keyData.status === "BANNED") {
+                return {
+                    success: false,
+                    message: "Key is banned",
+                    error: "KEY_BANNED",
+                    status: "BANNED"
+                };
+            }
+            
+            // Update HWID if needed
+            if (keyData.hwid === "" && hwid !== "unknown") {
+                keyData.hwid = hwid;
+                saveAllKeys(allKeys);
+            }
+            
+            // Successful validation
+            return {
+                success: true,
+                message: "Key valid",
+                status: keyData.status,
+                expires: expires.toISOString(),
+                created: keyData.created,
+                hwid: keyData.hwid,
+                ip: keyData.ip
+            };
+        }
+
+        // Key status API
+        function handleKeyStatus(data) {
+            const key = data.key;
+            const allKeys = getAllKeys();
+            const keyData = allKeys.find(k => k.key === key);
+            
+            if (!keyData) {
+                return {
+                    success: false,
+                    message: "Key not found"
+                };
+            }
+            
+            const expires = new Date(keyData.expires);
+            const now = new Date();
+            const timeLeft = expires - now;
+            
+            return {
+                success: true,
+                key: keyData.key,
+                status: keyData.status,
+                expires: expires.toISOString(),
+                timeLeft: timeLeft > 0 ? Math.floor(timeLeft / 1000) : 0,
+                created: keyData.created,
+                ip: keyData.ip,
+                hwid: keyData.hwid
+            };
+        }
+
+        // Stats API
+        function handleStats() {
+            const allKeys = getAllKeys();
+            const activeKeys = allKeys.filter(k => k.status === "ACTIVE");
+            const expiredKeys = allKeys.filter(k => k.status === "EXPIRED");
+            const bannedKeys = allKeys.filter(k => k.status === "BANNED");
+            
+            return {
+                success: true,
+                totalKeys: allKeys.length,
+                activeKeys: activeKeys.length,
+                expiredKeys: expiredKeys.length,
+                bannedKeys: bannedKeys.length,
+                uniqueIPs: [...new Set(allKeys.map(k => k.ip))].length,
+                serverTime: new Date().toISOString(),
+                uptime: Date.now() - window.startTime
+            };
+        }
+
+        // Get all keys from all users
+        function getAllKeys() {
+            const allKeys = [];
+            
+            // Get keys from localStorage for all users
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('lokus_keys_')) {
+                    try {
+                        const userKeys = JSON.parse(localStorage.getItem(key));
+                        allKeys.push(...userKeys);
+                    } catch (e) {
+                        console.error("Error parsing keys:", e);
+                    }
+                }
+            }
+            
+            return allKeys;
+        }
+
+        // Save all keys
+        function saveAllKeys(allKeys) {
+            // Group keys by IP
+            const keysByIP = {};
+            
+            allKeys.forEach(key => {
+                if (!keysByIP[key.ip]) {
+                    keysByIP[key.ip] = [];
+                }
+                keysByIP[key.ip].push(key);
+            });
+            
+            // Save each user's keys
+            Object.entries(keysByIP).forEach(([ip, userKeys]) => {
+                localStorage.setItem(`lokus_keys_${ip}`, JSON.stringify(userKeys));
+            });
+        }
+
+        // API Tester
+        function toggleAPITester() {
+            apiTester.classList.toggle('show');
+        }
+
+        async function testAPI() {
+            const key = apiKeyInput.value.trim();
+            
+            if (!key) {
+                apiResponse.textContent = JSON.stringify({
+                    error: "Please enter a key to test"
+                }, null, 2);
+                return;
+            }
+            
+            apiResponse.textContent = "Testing API...";
+            
+            const testData = {
+                key: key,
+                hwid: "test_hwid_123",
+                game: 1234567890
+            };
+            
+            try {
+                const result = await handleAPIRequest('/api/check', 'POST', testData);
+                apiResponse.textContent = JSON.stringify(result, null, 2);
+                
+                // Color code the response
+                if (result.success) {
+                    apiResponse.style.borderColor = 'var(--success)';
+                } else {
+                    apiResponse.style.borderColor = 'var(--danger)';
+                }
+            } catch (error) {
+                apiResponse.textContent = JSON.stringify({
+                    error: "API test failed",
+                    message: error.message
+                }, null, 2);
+                apiResponse.style.borderColor = 'var(--danger)';
+            }
         }
 
         // Background Particles
         function createParticles() {
             const container = document.getElementById('particles');
-            for (let i = 0; i < 30; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.width = Math.random() * 80 + 20 + 'px';
-                particle.style.height = particle.style.width;
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.background = Math.random() > 0.5 ? 'var(--neon-purple)' : 'var(--neon-blue)';
-                particle.style.opacity = Math.random() * 0.3 + 0.1;
-                particle.style.animation = `float ${Math.random() * 20 + 10}s infinite ease-in-out`;
-                particle.style.animationDelay = Math.random() * 5 + 's';
-                container.appendChild(particle);
+            for (let i = 0; i < 20; i++) {
+                createParticle(container);
             }
-            
-            // Add CSS animation
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes float {
-                    0%, 100% { transform: translate(0, 0) scale(1); }
-                    25% { transform: translate(${Math.random() * 50}px, ${Math.random() * 50}px) scale(1.1); }
-                    50% { transform: translate(${Math.random() * -50}px, ${Math.random() * 50}px) scale(0.9); }
-                    75% { transform: translate(${Math.random() * -50}px, ${Math.random() * -50}px) scale(1.1); }
-                }
-            `;
-            document.head.appendChild(style);
+        }
+
+        function createParticle(container) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.width = Math.random() * 60 + 20 + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.background = Math.random() > 0.5 ? 'var(--neon-purple)' : 'var(--neon-blue)';
+            particle.style.opacity = Math.random() * 0.2 + 0.1;
+            particle.style.animation = `float ${Math.random() * 20 + 10}s infinite ease-in-out`;
+            particle.style.animationDelay = Math.random() * 5 + 's';
+            container.appendChild(particle);
         }
 
         // Menu
         function setupMenu() {
             const menuBtn = document.getElementById('menuBtn');
             menuBtn.addEventListener('click', () => {
-                showToast('Menu feature coming soon!', 'info');
+                showToast('Use the buttons below to manage your keys!', 'info');
             });
         }
 
-        // Data Loading
-        function loadProgress() {
-            const savedProgress = localStorage.getItem(`lokus_progress_${userIP}`);
-            progress = savedProgress ? parseInt(savedProgress) : 0;
+        // URL Parameter System
+        function checkURLParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hash = urlParams.get('hash');
             
-            // Check for active verification
-            const verificationData = localStorage.getItem(`lokus_verification_${userIP}`);
-            if (verificationData) {
-                verificationSession = JSON.parse(verificationData);
+            if (hash && CONFIG.VALID_HASHES.includes(hash.toLowerCase())) {
+                completeVerificationTask();
+                showToast('✅ Verification completed!', 'success');
+                
+                // Clear URL parameters
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
 
-        function loadKeys() {
+        // Data Management
+        function loadUserData() {
+            // Load progress
+            const savedProgress = localStorage.getItem(`lokus_progress_${userIP}`);
+            progress = savedProgress ? parseInt(savedProgress) : 0;
+            
+            // Load current session
+            const savedSession = localStorage.getItem(`lokus_session_${userIP}`);
+            if (savedSession) {
+                currentSession = JSON.parse(savedSession);
+                
+                // Check if session is expired
+                if (Date.now() - currentSession.startTime > CONFIG.SESSION_TIMEOUT) {
+                    currentSession = null;
+                    localStorage.removeItem(`lokus_session_${userIP}`);
+                }
+            }
+
+            // Load keys
             const savedKeys = localStorage.getItem(`lokus_keys_${userIP}`);
             if (savedKeys) {
                 try {
@@ -987,13 +1385,54 @@
                     keys = [];
                 }
             }
+            
+            // Set start time for stats
+            window.startTime = Date.now();
+        }
+
+        function saveUserData() {
+            // Save progress
+            localStorage.setItem(`lokus_progress_${userIP}`, progress);
+            
+            // Save current session
+            if (currentSession) {
+                localStorage.setItem(`lokus_session_${userIP}`, JSON.stringify(currentSession));
+            }
+            
+            // Save keys
+            if (keys.length > 0) {
+                localStorage.setItem(`lokus_keys_${userIP}`, JSON.stringify(keys));
+            }
+        }
+
+        // Task Management
+        function updateTaskList() {
+            const tasks = [
+                { id: 1, name: "Complete Linkvertise Task 1", completed: progress >= 1 },
+                { id: 2, name: "Complete Linkvertise Task 2", completed: progress >= 2 }
+            ];
+
+            let html = '';
+            tasks.forEach(task => {
+                html += `
+                    <div class="task-item">
+                        <div class="task-icon ${task.completed ? 'completed' : ''}">
+                            ${task.completed ? '<i class="fas fa-check"></i>' : task.id}
+                        </div>
+                        <div class="task-info">
+                            <div class="task-name">${task.name}</div>
+                            <div class="task-status">${task.completed ? '✅ Completed' : '⏳ Pending'}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            taskList.innerHTML = html;
         }
 
         // Progress Management
         function updateProgressUI() {
             progressValue.textContent = `${progress}/2`;
             progressFill.style.width = `${(progress / 2) * 100}%`;
-            localStorage.setItem(`lokus_progress_${userIP}`, progress);
             
             // Update button states
             const canGenerate = progress >= 2 && keys.length < CONFIG.MAX_KEYS;
@@ -1002,92 +1441,97 @@
             
             if (canGenerate) {
                 generateKeyBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Generate New Key';
-                emptyGenerateBtn.innerHTML = '<i class="fas fa-key"></i> Generate New Key';
-                emptyGenerateBtn.classList.remove('btn-primary');
-                emptyGenerateBtn.classList.add('btn-secondary');
+                if (emptyGenerateBtn) {
+                    emptyGenerateBtn.innerHTML = '<i class="fas fa-key"></i> Generate New Key';
+                    emptyGenerateBtn.classList.remove('btn-primary');
+                    emptyGenerateBtn.classList.add('btn-secondary');
+                }
             } else if (progress < 2) {
                 generateKeyBtn.innerHTML = `<i class="fas fa-lock"></i> ${progress}/2 Progress Needed`;
-                emptyGenerateBtn.innerHTML = `<i class="fas fa-lock"></i> ${progress}/2 Progress Needed`;
-                emptyGenerateBtn.classList.remove('btn-secondary');
-                emptyGenerateBtn.classList.add('btn-primary');
+                if (emptyGenerateBtn) {
+                    emptyGenerateBtn.innerHTML = `<i class="fas fa-lock"></i> ${progress}/2 Progress Needed`;
+                    emptyGenerateBtn.classList.remove('btn-secondary');
+                    emptyGenerateBtn.classList.add('btn-primary');
+                }
             } else {
                 generateKeyBtn.innerHTML = '<i class="fas fa-ban"></i> Max Keys Reached';
-                emptyGenerateBtn.innerHTML = '<i class="fas fa-ban"></i> Max Keys Reached';
+                if (emptyGenerateBtn) {
+                    emptyGenerateBtn.innerHTML = '<i class="fas fa-ban"></i> Max Keys Reached';
+                }
             }
+            
+            updateTaskList();
+            saveUserData();
         }
 
-        function checkVerificationStatus() {
-            if (!verificationSession || isProcessing) return;
-
-            const currentTime = Date.now();
-            const startTime = verificationSession.startTime;
-            const timeDiff = (currentTime - startTime) / 1000;
-
-            // Check if verification is completed
-            if (timeDiff > CONFIG.SESSION_DURATION) {
-                isProcessing = true;
+        // Verification System
+        function completeVerificationTask() {
+            if (progress < 2) {
+                progress++;
                 
-                // Simulate verification completion
-                setTimeout(() => {
-                    if (progress < 2) {
-                        progress++;
-                        updateProgressUI();
-                        
-                        if (progress === 1) {
-                            showToast('✅ First verification completed! (1/2)', 'success');
-                        } else if (progress === 2) {
-                            showToast('🎉 All verifications completed! You can now generate keys.', 'success');
-                        }
-                    }
-                    
-                    // Clear session
-                    localStorage.removeItem(`lokus_verification_${userIP}`);
-                    verificationSession = null;
-                    isProcessing = false;
-                }, 1000);
+                // Clear session
+                currentSession = null;
+                localStorage.removeItem(`lokus_session_${userIP}`);
+                
+                // Show completion message
+                if (progress === 1) {
+                    showToast('✅ First task completed! (1/2)', 'success');
+                } else if (progress === 2) {
+                    showToast('🎉 All tasks completed! You can now generate keys.', 'success');
+                }
+                
+                // Update UI
+                updateProgressUI();
+                saveUserData();
+                
+                return true;
             }
+            return false;
         }
 
         // Start Verification
-        startBtn.addEventListener('click', async () => {
+        startBtn.addEventListener('click', function() {
             if (progress >= 2) {
-                showToast('✅ All verifications already completed!', 'info');
+                showToast('✅ All tasks already completed!', 'info');
                 return;
             }
 
-            if (verificationSession) {
-                showToast('⏳ Verification in progress...', 'warning');
-                return;
-            }
-
-            // Create new verification session
-            verificationSession = {
+            // Create new session
+            const sessionId = generateSessionId();
+            currentSession = {
+                id: sessionId,
                 startTime: Date.now(),
-                ip: userIP
+                task: progress + 1
             };
-            
-            localStorage.setItem(`lokus_verification_${userIP}`, JSON.stringify(verificationSession));
 
-            // Show loading
-            startBtn.innerHTML = '<span class="loading"></span> Starting...';
+            // Update button state
+            startBtn.innerHTML = '<span class="loading"></span> Opening...';
             startBtn.disabled = true;
 
-            // Open Linkvertise in new tab
-            window.open(CONFIG.LINKVERTISE_URL, '_blank');
+            // Show session info
+            showToast('🔗 Opening verification link...', 'info');
             
-            showToast('🔗 Opened verification link. Complete the task and return here.', 'info');
-            showToast('⏱️ You have 30 seconds to complete the task.', 'warning');
-
-            // Reset button after 3 seconds
             setTimeout(() => {
+                // Open Linkvertise
+                window.open(CONFIG.LINKVERTISE_URL, '_blank');
+                
+                // Save session
+                saveUserData();
+                
+                // Show instructions
+                showToast('✅ Complete the task and return here.', 'success');
+                
+                // Reset button
                 startBtn.innerHTML = '<i class="fas fa-play"></i> Start Verification';
                 startBtn.disabled = false;
-            }, 3000);
+            }, 1000);
         });
 
         // Key Generation
         generateKeyBtn.addEventListener('click', generateKey);
-        emptyGenerateBtn.addEventListener('click', generateKey);
+        if (emptyGenerateBtn) {
+            emptyGenerateBtn.addEventListener('click', generateKey);
+        }
 
         function generateKey() {
             // Check conditions
@@ -1101,23 +1545,16 @@
                 return;
             }
 
-            if (isProcessing) {
-                showToast('⏳ Please wait...', 'warning');
-                return;
-            }
-
-            isProcessing = true;
-            
             // Generate key
-            const key = generateRandomKey(24);
+            const key = generateRandomKey();
             const now = new Date();
             const expires = new Date(now.getTime() + CONFIG.KEY_DURATION);
 
             const newKey = {
                 id: 'key_' + Date.now(),
                 key: key,
-                created: now,
-                expires: expires,
+                created: now.toISOString(),
+                expires: expires.toISOString(),
                 status: 'ACTIVE',
                 ip: userIP,
                 hwid: ''
@@ -1126,30 +1563,26 @@
             // Add to keys array
             keys.push(newKey);
             
-            // Save to localStorage
-            localStorage.setItem(`lokus_keys_${userIP}`, JSON.stringify(keys));
-            
             // Reset progress
             progress = 0;
-            updateProgressUI();
+            currentSession = null;
             
-            // Update UI
+            // Save and update
+            saveUserData();
+            updateProgressUI();
             updateKeysTable();
             updateStats();
             
             // Show success
-            setTimeout(() => {
-                showToast(`✅ Key generated successfully!`, 'success');
-                showToast(`🔑 Key: ${key}`, 'info');
-                isProcessing = false;
-                
-                // Auto-copy to clipboard
-                navigator.clipboard.writeText(key).then(() => {
-                    showToast('📋 Key copied to clipboard!', 'success');
-                }).catch(() => {
-                    showToast('⚠️ Could not copy to clipboard', 'warning');
-                });
-            }, 500);
+            showToast(`✅ Key generated successfully!`, 'success');
+            showToast(`🔑 Your key: ${key}`, 'info');
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(key).then(() => {
+                showToast('📋 Key copied to clipboard!', 'success');
+            }).catch(() => {
+                showToast('⚠️ Could not copy to clipboard', 'warning');
+            });
         }
 
         // Key Management
@@ -1172,7 +1605,10 @@
                     </div>`;
                 
                 // Re-add event listener
-                document.getElementById('emptyGenerateBtn')?.addEventListener('click', generateKey);
+                const newBtn = document.getElementById('emptyGenerateBtn');
+                if (newBtn) {
+                    newBtn.addEventListener('click', generateKey);
+                }
                 keysCount.textContent = '0 keys generated • 0 active';
                 return;
             }
@@ -1193,7 +1629,7 @@
                     <tbody>`;
 
             keys.forEach((keyObj, index) => {
-                const timeLeft = keyObj.expires - new Date();
+                const timeLeft = new Date(keyObj.expires) - new Date();
                 const hours = Math.floor(timeLeft / (1000 * 60 * 60));
                 const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
@@ -1238,14 +1674,6 @@
 
             html += `</tbody></table>`;
             keysTable.innerHTML = html;
-            
-            // Re-add event listeners for copy buttons
-            keys.forEach((keyObj, index) => {
-                const copyBtn = document.querySelector(`button[onclick="copyKey('${keyObj.key}', ${index})"]`);
-                if (copyBtn) {
-                    copyBtn.addEventListener('click', () => copyKey(keyObj.key, index));
-                }
-            });
         }
 
         function updateTimers() {
@@ -1253,12 +1681,12 @@
                 const timeElement = document.getElementById(`time-${index}`);
                 if (!timeElement) return;
 
-                const timeLeft = keyObj.expires - new Date();
+                const timeLeft = new Date(keyObj.expires) - new Date();
                 
                 if (timeLeft <= 0) {
                     if (keyObj.status === 'ACTIVE') {
                         keyObj.status = 'EXPIRED';
-                        localStorage.setItem(`lokus_keys_${userIP}`, JSON.stringify(keys));
+                        saveUserData();
                         updateKeysTable();
                     }
                     return;
@@ -1299,8 +1727,6 @@
                         btn.style.color = '';
                     }, 1000);
                 }
-            }).catch(() => {
-                showToast('❌ Failed to copy key', 'error');
             });
         }
 
@@ -1319,46 +1745,67 @@
             }
 
             // Add 24 hours
-            const newExpiry = new Date(keyObj.expires.getTime() + CONFIG.KEY_DURATION);
-            keyObj.expires = newExpiry;
+            const expires = new Date(keyObj.expires);
+            const newExpiry = new Date(expires.getTime() + CONFIG.KEY_DURATION);
+            keyObj.expires = newExpiry.toISOString();
             keyObj.status = 'ACTIVE';
             
             // Reset progress
             progress = 0;
-            updateProgressUI();
+            currentSession = null;
             
-            // Save changes
-            localStorage.setItem(`lokus_keys_${userIP}`, JSON.stringify(keys));
+            // Save and update
+            saveUserData();
+            updateProgressUI();
             updateKeysTable();
             
             showToast('⏰ Key extended by 24 hours!', 'success');
         }
 
         // Utility Functions
-        function generateRandomKey(length) {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let result = '';
-            for (let i = 0; i < length; i++) {
+        function generateRandomKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = 'LOKUS-';
+            for (let i = 0; i < 12; i++) {
                 result += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-            // Format: XXXX-XXXX-XXXX-XXXX
-            return result.match(/.{1,6}/g).join('-');
+            // Format: LOKUS-XXXX-XXXX-XXXX
+            return result.slice(0, 6) + '-' + result.slice(6, 10) + '-' + result.slice(10, 14) + '-' + result.slice(14, 18);
+        }
+
+        function generateSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function cleanupOldSessions() {
+            if (currentSession && Date.now() - currentSession.startTime > CONFIG.SESSION_TIMEOUT) {
+                currentSession = null;
+                localStorage.removeItem(`lokus_session_${userIP}`);
+            }
         }
 
         function resetProgress() {
             if (confirm('Reset your verification progress? This will not delete your keys.')) {
                 progress = 0;
+                currentSession = null;
                 updateProgressUI();
-                localStorage.removeItem(`lokus_progress_${userIP}`);
-                localStorage.removeItem(`lokus_verification_${userIP}`);
-                verificationSession = null;
+                saveUserData();
                 showToast('🔄 Progress reset successfully!', 'success');
             }
         }
 
-        function autoSave() {
-            if (keys.length > 0) {
-                localStorage.setItem(`lokus_keys_${userIP}`, JSON.stringify(keys));
+        // Manual progress for testing
+        function manualAddProgress() {
+            if (progress < 2) {
+                progress++;
+                updateProgressUI();
+                showToast(`✅ Manually added progress: ${progress}/2`, 'success');
+                
+                if (progress === 2) {
+                    showToast('🎉 All tasks completed! You can now generate keys.', 'success');
+                }
+            } else {
+                showToast('✅ Already at maximum progress!', 'info');
             }
         }
 
@@ -1414,6 +1861,34 @@
                 }, 3000);
             });
         }
+
+        // Expose API for external access (for Roblox GUI)
+        window.LokusHubAPI = {
+            checkKey: async function(key, hwid, gameId) {
+                const data = {
+                    key: key,
+                    hwid: hwid || "unknown",
+                    game: gameId || 0
+                };
+                return await handleAPIRequest('/api/check', 'POST', data);
+            },
+            
+            getKeyStatus: async function(key) {
+                const data = { key: key };
+                return await handleAPIRequest('/api/status', 'GET', data);
+            },
+            
+            getStats: async function() {
+                return await handleAPIRequest('/api/stats', 'GET', {});
+            },
+            
+            // For testing
+            testAPI: testAPI,
+            toggleTester: toggleAPITester
+        };
+
+        // Make API globally accessible
+        console.log("LOKUS HUB API ready! Use window.LokusHubAPI to access.");
     </script>
 </body>
 </html>
